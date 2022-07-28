@@ -16,23 +16,251 @@ records into objects in an object-oriented language.
 
 ## Introduction
 
-Lorem ipsum dolor sit amet. Ut velit fugit et porro voluptas quia sequi quo
-libero autem qui similique placeat eum velit autem aut repellendus quia. Et
-Quis magni ut fugit obcaecati in expedita fugiat est iste rerum qui ipsam
-ducimus et quaerat maxime sit eaque minus. Est molestias voluptatem et nostrum
-recusandae qui incidunt Quis 33 ipsum perferendis sed similique architecto.
+In this lesson, we'll cover the basics of reading from a database table that is
+mapped to a Python object.
 
-Sed ipsam quidem eum minima maxime et commodi dolores quo ipsa maxime aut vero
-consectetur id velit dignissimos. Et fuga porro eum galisum suscipit qui esse
-blanditiis sed explicabo officia aut mollitia error est illo earum et sint
-laborum! Sit aspernatur accusantium aut doloribus saepe est magni quod aut
-molestiae voluptatem.
+Our Python program gets most interesting when we add data. To do this, we use a
+database. When we want our Python program to store things, we send them off to a
+database. When we want to retrieve those things, we ask the database to send
+them back to our program. This works very well, but there is one small problem
+to overcome— our Python program and the database don't speak the same language.
 
-Vel inventore minus aut ullam maiores sit internos cupiditate eos odit totam
-eos molestiae galisum. Et ipsum provident ut nihil dicta et dicta doloremque
-eum magnam ullam ut quibusdam quaerat.
+Python understands objects. The database understands raw data.
+
+We don't store Python objects in the database, and we don't get Python objects
+back from the database. We store raw data describing a given Python object in a
+table row, and when we want to reconstruct a Python object from the stored data,
+we select that same row in the table.
+
+When we query the database, it is up to us to write the code that takes that
+data and turns it back into an instance of the appropriate class. We, the
+programmers, will be responsible for translating the raw data that the database
+sends into Python objects that are instances of a particular class.
 
 ***
+
+## Code Along
+
+Let's continue building out the `Song` class and its object-relational mapping
+methods from the previous lesson. We can use our code to make new songs and
+persist them to the database, but what if we want to access existing songs from
+the database?
+
+We need to build three methods to access all of those songs and convert them to
+Python objects.
+
+To start, review the code from the `Song` class. Then take a look at this code
+in the `debug.py` file:
+
+```py
+#!/usr/bin/env python3
+
+from lib import CONN, CURSOR
+from lib.song import Song
+
+def reset_database():
+    Song.drop_table()
+    Song.create_table()
+    Song.create("Hello", "25")
+    Song.create("99 Problems", "The Black Album")
+
+
+reset_database()
+
+import pytest; pytest.set_trace()
+```
+
+This file is set up so that you can explore the database using the `Song` class
+from a `pdb` session. We'll use this code later on during this code along.
+
+***
+
+## `new_from_db()`
+
+The first thing we need to do is convert what the database gives us into a Python
+object. We will use this method to create all the Python objects in our next two
+methods.
+
+One thing to know is that the database, SQLite in our case, will return an array
+of data for each row. For example, a row for Michael Jackson's "Billie Jean"
+from the album "Thriller" that has an id of 1 would look like this:
+`[1, "Billie Jean", "Thriller"]`.
+
+```py
+class Song
+
+    # ... rest of methods
+
+    @classmethod
+    def new_from_db(cls, row):
+        song = cls(row[1], row[2])
+        song.id = row[0]
+```
+
+Now, you may notice something — since we're retrieving data from a database, we
+are using the class constructor through `cls`. We don't need to _create_
+records. With this method, we're reading data from SQLite and temporarily
+representing that data in Python.
+
+***
+
+## `get_all()`
+
+Recall that in previous lessons with Python classes, we used the `all` class
+attribute to represent all instances of our class. In those examples, `all` was
+the **single source of truth** for instances in a particular class.
+
+That approach showed some limitations, however. Using that attribute meant that
+our Python objects were only persisted in memory as long as our Python program
+was running. If we exited the program and re-ran our code, we'd lose access to
+that data.
+
+Now that we have a SQL database, our classes have a new way to persist data:
+using the database!
+
+To return all the songs in the database, we need to execute the following SQL
+query: `SELECT * FROM songs`. Let's store the statement that represents this
+action in a variable called `sql` using a multi-line string (`"""`). This query
+won't be very long, but this is best practice for SQL statements as many get
+_quite_ long.
+
+```py
+sql = """"
+  SELECT *
+  FROM songs
+"""
+```
+
+Next, we will make a call to our database using `CURSOR`. This `sqlite3.Cursor`
+object is located in `lib/__init__.py`, parallel to the `song` module that uses
+it.
+
+```py
+CONN = sqlite3.connect('db/music.db')
+CURSOR = CONN.cursor()
+```
+
+Our `sqlite3.Cursor` instance will respond to a method called `execute` that
+accepts raw SQL as a string (as we've seen a couple times already). The
+`fetchall()` method will then return the rows sequentially in a tuple. Let's
+pass in that SQL we stored above:
+
+```py
+class Song
+
+    # you don't need this, but default values can help you avoid errors later on
+    all = []
+
+    # ... rest of methods
+
+    @classmethod
+    def all(cls):
+        sql = """
+            SELECT *
+            FROM songs
+        """
+
+        all = CURSOR.execute(sql).fetchall()
+```
+
+This will return an array of rows from the database that matches our query. Now,
+all we have to do is iterate over each row and use the `new_from_db()`
+create a new Python object for each row:
+
+```py
+class Song
+
+    all = []
+
+    # ... rest of methods
+
+    @classmethod
+    def get_all(cls):
+        sql = """
+            SELECT *
+            FROM songs
+        """
+
+        all = CURSOR.execute(sql).fetchall()
+
+        cls.all = [cls.new_from_db(row) for row in all]
+```
+
+With this method in place, let's try using the `get_all()` method from `pdb` to
+access all the songs in the database. Run `python debug.py`, and then follow
+along in the `pdb` terminal:
+
+```py
+Song.get_all()
+# => [<lib.song.Song object at 0x101346680>, <lib.song.Song object at 0x101e50d60>]
+```
+
+To see a bit more detail, we can use the `.__dict__` attribute that Python
+assigns to new objects:
+
+```py
+[song.__dict__ for song in Song.all]
+# => [{'id': 1, 'name': 'Hello', 'album': '25'}, {'id': 2, 'name': '99 Problems', 'album': 'The Black Album'}]
+```
+
+Success! We can see both songs in the database as an array of song instances. We
+can interact with them just like any other Python objects:
+
+```py
+Song.all[0].__dict__
+# => {'id': 1, 'name': 'Hello', 'album': '25'}
+Song.all[-1].__dict__
+# => {'id': 2, 'name': '99 Problems', 'album': 'The Black Album'}
+Song.all[-1].name
+# => "99 Problems"
+Song.all[-1].name[::-1]
+# => "smelborP 99"
+```
+
+## `find_by_name()`
+
+This one is similar to `get_all()`, with the small exception being that we have
+to include a `name` in our SQL statement. To do this, we use a question mark
+where we want the `name` parameter to be passed in, and we include `name` as the
+second argument to the `execute()` method:
+
+```py
+class Song:
+
+    # ... rest of methods
+
+    @classmethod
+    def find_by_name(cls, name)
+        sql = """
+            SELECT *
+            FROM songs
+            WHERE name = ?
+            LIMIT 1
+        """
+
+        song = CURSOR.execute(sql, (name,)).fetchone()
+
+        return cls.new_from_db(song)
+
+```
+
+There are a couple important things to note here:
+
+- Bound parameters must be passed to the `execute` statement as a sequence
+  data type. This is typically performed with tuples to match the format that
+  results are returned in. A tuple containing only one element must have a
+  comma after that element, otherwise it is interpreted as a grouped statement
+  (think [PEMDAS]https://en.wikipedia.org/wiki/Order_of_operations).
+- The `fetchone()` method returns the first element from `fetchall()`.
+
+Let's try out this new method. Exit `pdb` and run `python debug.py` again:
+
+```py
+Song.find_by_name("Hello").__dict__
+# => {'id': 1, 'name': 'Hello', 'album': '25'}
+```
+
+Success!
 
 ## Lesson Section
 

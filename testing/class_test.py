@@ -1,39 +1,24 @@
-"""
-pytest requires that all testing modules, classes, methods, and functions
-contain the word "test" somewhere within them.
+import sys
 
-The conventions for naming tests in the Python curriculum are as follows:
-
-    - One test module should be created for each class. If there are no classes
-      to test, one test module should be created for each module being tested.
-    - Test modules should be named {classname}_test.py, or {modulename}_test.py
-      if necessary.
-    - Test modules should be located at the base of the "testing" package.
-    
-    In {classname}_test.py:
-        - There should be one testing class, named Test{Classname}.
-        - The testing class should contain the following docstring:
-            
-            '''Class {Classname} in {modulename}.py'''
-
-        - There should be at least one testing method for each instance, class,
-          or static method belonging to the class being tested, including
-          __init__.
-        - Each testing method should be named test_{performs/does_behavior},
-          where {performs/does_behavior} is a clear and concise description of
-          the desired behavior.
-        - Each testing method should only test one behavior.
-        - Each testing method should contain the following docstring:
-
-            '''performs/does behavior when {x} happens.'''
-
-            ...where {x} describes the manipulation that takes place within
-            the test.
-"""
+import sqlite3
+from lib.song import Song
 
 class TestClass:
     '''Class {Classname} in {modulename}.py'''
 
     def test_performs_behavior(self):
         '''performs behavior when something happens.'''
-        assert(False)
+        print(sys.path)
+        assert(True)
+
+['/Users/benbotsford/Documents/new-curriculum/object-relational-mapping/python-p3-mapping-database-records-to-python-objects',
+'/Users/benbotsford/Documents/new-curriculum/object-relational-mapping/python-p3-mapping-database-records-to-python-objects/.venv/bin',
+'/Users/benbotsford/.pyenv/versions/3.10.4/lib/python310.zip', '/Users/benbotsford/.pyenv/versions/3.10.4/lib/python3.10',
+'/Users/benbotsford/.pyenv/versions/3.10.4/lib/python3.10/lib-dynload',
+'/Users/benbotsford/Documents/new-curriculum/object-relational-mapping/python-p3-mapping-database-records-to-python-objects/.venv/lib/python3.10/site-packages']
+
+['/Users/benbotsford/Documents/new-curriculum/object-relational-mapping/python-p3-mapping-database-records-to-python-objects/bin',
+'/Users/benbotsford/.pyenv/versions/3.10.4/lib/python310.zip',
+'/Users/benbotsford/.pyenv/versions/3.10.4/lib/python3.10',
+'/Users/benbotsford/.pyenv/versions/3.10.4/lib/python3.10/lib-dynload',
+'/Users/benbotsford/Documents/new-curriculum/object-relational-mapping/python-p3-mapping-database-records-to-python-objects/.venv/lib/python3.10/site-packages']
