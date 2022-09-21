@@ -162,7 +162,6 @@ class Song
         """
 
         all = CURSOR.execute(sql).fetchall()
-        return cls.all
 ```
 
 This will return an array of rows from the database that matches our query. Now,
@@ -186,6 +185,7 @@ class Song
         all = CURSOR.execute(sql).fetchall()
 
         cls.all = [cls.new_from_db(row) for row in all]
+        return cls.all
 ```
 
 With this method in place, let's try using the `get_all()` method from `pdb` to
