@@ -232,7 +232,7 @@ class Song:
     # ... rest of methods
 
     @classmethod
-    def find_by_name(cls, name)
+    def find_by_name(cls, name):
         sql = """
             SELECT *
             FROM songs
