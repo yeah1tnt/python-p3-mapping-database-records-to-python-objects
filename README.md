@@ -95,6 +95,7 @@ class Song
     def new_from_db(cls, row):
         song = cls(row[1], row[2])
         song.id = row[0]
+        return song
 ```
 
 Now, you may notice something — since we're retrieving data from a database, we
@@ -154,13 +155,14 @@ class Song
     # ... rest of methods
 
     @classmethod
-    def all(cls):
+    def get_all(cls):
         sql = """
             SELECT *
             FROM songs
         """
 
         all = CURSOR.execute(sql).fetchall()
+        return cls.all
 ```
 
 This will return an array of rows from the database that matches our query. Now,
