@@ -95,6 +95,7 @@ class Song
     def new_from_db(cls, row):
         song = cls(row[1], row[2])
         song.id = row[0]
+        return song
 ```
 
 Now, you may notice something — since we're retrieving data from a database, we
@@ -154,7 +155,7 @@ class Song
     # ... rest of methods
 
     @classmethod
-    def all(cls):
+    def get_all(cls):
         sql = """
             SELECT *
             FROM songs
@@ -184,6 +185,7 @@ class Song
         all = CURSOR.execute(sql).fetchall()
 
         cls.all = [cls.new_from_db(row) for row in all]
+        return cls.all
 ```
 
 With this method in place, let's try using the `get_all()` method from `pdb` to
@@ -230,7 +232,7 @@ class Song:
     # ... rest of methods
 
     @classmethod
-    def find_by_name(cls, name)
+    def find_by_name(cls, name):
         sql = """
             SELECT *
             FROM songs
