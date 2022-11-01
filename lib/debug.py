@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-from lib import CONN, CURSOR
-from lib.song import Song
+from song import Song, CONN, CURSOR
 
 def reset_database():
     Song.drop_table()
@@ -12,4 +11,4 @@ def reset_database():
 
 reset_database()
 
-import pytest; pytest.set_trace()
+import ipdb; ipdb.set_trace()

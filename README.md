@@ -53,10 +53,9 @@ To start, review the code from the `Song` class. Then take a look at this code
 in the `debug.py` file:
 
 ```py
-#!/usr/bin/env python3
+# lib/debug.py
 
-from lib import CONN, CURSOR
-from lib.song import Song
+from song import Song, CONN, CURSOR
 
 def reset_database():
     Song.drop_table()
@@ -71,7 +70,7 @@ import pytest; pytest.set_trace()
 ```
 
 This file is set up so that you can explore the database using the `Song` class
-from a `pdb` session. We'll use this code later on during this code along.
+from an `ipdb` session. We'll use this code later on during this code along.
 
 ***
 
@@ -133,11 +132,14 @@ sql = """"
 ```
 
 Next, we will make a call to our database using `CURSOR`. This `sqlite3.Cursor`
-object is located in `lib/__init__.py`, parallel to the `song` module that uses
-it.
+object is located in `lib/song.py`.
 
 ```py
-CONN = sqlite3.connect('db/music.db')
+# lib/song.py
+
+import sqlite3
+
+CONN = sqlite3.connect('lib/music.db')
 CURSOR = CONN.cursor()
 ```
 
@@ -149,7 +151,7 @@ pass in that SQL we stored above:
 ```py
 class Song
 
-    # you don't need this, but default values can help you avoid errors later on
+    # you don't need this, but default empty values can help you avoid errors later on
     all = []
 
     # ... rest of methods
@@ -188,9 +190,9 @@ class Song
         return cls.all
 ```
 
-With this method in place, let's try using the `get_all()` method from `pdb` to
+With this method in place, let's try using the `get_all()` method from `ipdb` to
 access all the songs in the database. Run `python debug.py`, and then follow
-along in the `pdb` terminal:
+along in the `ipdb` shell:
 
 ```py
 Song.get_all()
