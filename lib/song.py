@@ -1,4 +1,7 @@
-from . import CONN, CURSOR
+import sqlite3
+
+CONN = sqlite3.connect('lib/music.db')
+CURSOR = CONN.cursor()
 
 class Song:
 
