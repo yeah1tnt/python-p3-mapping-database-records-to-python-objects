@@ -53,7 +53,7 @@ To start, review the code from the `Song` class. Then take a look at this code
 in the `debug.py` file:
 
 ```py
-# lib/debug.py
+# debug.py
 
 from song import Song, CONN, CURSOR
 
@@ -66,7 +66,7 @@ def reset_database():
 
 reset_database()
 
-import pytest; pytest.set_trace()
+import ipdb; ipdb.set_trace()
 ```
 
 This file is set up so that you can explore the database using the `Song` class
@@ -132,14 +132,14 @@ sql = """"
 ```
 
 Next, we will make a call to our database using `CURSOR`. This `sqlite3.Cursor`
-object is located in `lib/song.py`.
+object is located in `song.py`.
 
 ```py
-# lib/song.py
+# song.py
 
 import sqlite3
 
-CONN = sqlite3.connect('lib/music.db')
+CONN = sqlite3.connect('music.db')
 CURSOR = CONN.cursor()
 ```
 
